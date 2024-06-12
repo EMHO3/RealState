@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class AdminController extends Controller
 {
@@ -93,4 +94,39 @@ class AdminController extends Controller
 
     }
     // FIN DEL METODO
+
+    ///////////////ADMIN USER ALL METHODS///////////////////
+    public function AllAdmin(){
+        $alladmin=User::where('role','admin')->get();
+        return view('backend.pages.admin.all_admin',compact('alladmin'));
+    }
+
+    public function AddAdmin()  {
+        $roles=Role::all();
+        return view('backend.pages.admin.add_admin',compact('roles'));
+    }
+
+    public function StoreAdmin (Request $request) {
+        $user=new User();
+        $user->username=$request->username;
+        $user->name=$request->name;
+        $user->email =$request->email ;
+        $user->phone=$request->phone;
+        $user->address=$request->address;
+        $user->password= Hash::make($request->password);
+        $user->role='admin';
+        $user->status='active';
+        $user->save();
+
+        
+        if ($request->roles) {
+            $user->assignRole($request->roles);
+        }
+        $notificacion=array(
+            'message'=>'Adimn Added successfully',
+            'alert-type'=>'success'
+        );
+        return redirect()->route('all.admin')->with($notificacion);
+
+    }
 }
